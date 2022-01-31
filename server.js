@@ -1,6 +1,10 @@
 const express = require("express");
+const bodyParser = require('body-parser')
 
 server = express();
+
+server.use(bodyParser.urlencoded({extended=true}))
+server.use(bodyParser.json())
 
 server.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html");
