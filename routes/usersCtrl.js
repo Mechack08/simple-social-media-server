@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const models = require("../models");
+const jwtUtils = require("../utils/jwt.utils");
 
 module.exports = {
   register: (req, res) => {
@@ -44,5 +44,35 @@ module.exports = {
           .json({ error: "enable to verify user " + error });
       });
   },
-  login: (req, res) => {},
+  login: (req, res) => {
+    const { email, password } = req.body;
+
+    if (email == null || password == null) {
+      return res.status(400).json({ error: "Missing parameters" });
+    }
+
+    //TODO Verify pseudo length, mail regex, password, etc.
+    models.User.findOne({
+      where: { emai: email },
+    })
+      .then((user) => {
+        if (user) {
+          bcrypt.compare(password, user.password, (e, response) => {
+            if (response) {
+              return res.status(200).json({
+                userId: user.id,
+                token: jwtUtils.generateTokenForUser(user),
+              });
+            } else {
+              return res.status(401).json({ error: "user password incorrect" });
+            }
+          });
+        } else {
+          return res.status(404).json({ error: "user do not exist in db" });
+        }
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: "enable to verify user " });
+      });
+  },
 };
