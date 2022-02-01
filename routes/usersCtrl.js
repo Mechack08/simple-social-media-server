@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const models = require("../models");
 const jwtUtils = require("../utils/jwt.utils");
 const asyncLib = require("async");
+const { where } = require("sequelize/dist");
 
 const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -183,5 +184,25 @@ module.exports = {
       .catch((err) => {
         return res.status(500).json({ error: "enable to verify user " });
       }); */
+  },
+  getUserProfile: (req, res) => {
+    //Getting auth header
+    const headerAuth = req.headers["authorization"];
+    const userId = jwtUtils.getUserId(headerAuth);
+
+    if (userId < 0) return res.status(400).json({ error: "wrong token" });
+
+    models.User.findOne({
+      attributes: ["id", "emai", "username", "bio"],
+      where: { id: userId },
+    })
+      .then((user) => {
+        if (user) {
+          return res.status(200).json(user);
+        } else return res.status(404).json({ error: "user not found" });
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: "cannot fetch user data" });
+      });
   },
 };
