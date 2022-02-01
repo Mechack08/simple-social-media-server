@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const models = require("../models");
 const jwtUtils = require("../utils/jwt.utils");
 const asyncLib = require("async");
-const { where } = require("sequelize/dist");
 
 const EMAIL_REGEX =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -189,6 +188,7 @@ module.exports = {
     //Getting auth header
     const headerAuth = req.headers["authorization"];
     const userId = jwtUtils.getUserId(headerAuth);
+    console.log(headerAuth);
 
     if (userId < 0) return res.status(400).json({ error: "wrong token" });
 

@@ -14,16 +14,20 @@ module.exports = {
     );
   },
   parseAuthorization: (authorization) => {
-    return authorization != null ? authorization.replace("Bearer ", "") : null;
+    const authorizationKey = authorization.split(" ");
+    const token = authorizationKey[1];
+    return token;
+    //return authorization != null ? authorization.replace("Bearer", "") : null;
   },
   getUserId: (authorization) => {
-    const userId = -1;
+    let userId = -1;
     const token = module.exports.parseAuthorization(authorization);
+    console.log(token);
     if (token != null) {
       try {
         const jwtToken = jwt.verify(token, SECRET_KEY);
         if (jwtToken != null) userId = jwtToken.userId;
-      } catch (e) {}
+      } catch (err) {}
     }
     return userId;
   },
