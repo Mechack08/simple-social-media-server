@@ -188,7 +188,6 @@ module.exports = {
     //Getting auth header
     const headerAuth = req.headers["authorization"];
     const userId = jwtUtils.getUserId(headerAuth);
-    console.log(headerAuth);
 
     if (userId < 0) return res.status(400).json({ error: "wrong token" });
 
@@ -204,5 +203,52 @@ module.exports = {
       .catch((err) => {
         return res.status(500).json({ error: "cannot fetch user data" });
       });
+  },
+  updateUserProfile: (req, res) => {
+    //Getting auth header
+    const headerAuth = req.headers["authorization"];
+    const userId = jwtUtils.getUserId(headerAuth);
+
+    const { bio } = req.body;
+
+    asyncLib.waterfall(
+      [
+        (done) => {
+          models.User.findOne({
+            attributes: ["id", "bio"],
+            where: { id: userId },
+          })
+            .then((getedUser) => {
+              done(null, getedUser);
+            })
+            .catch((err) => {
+              return res
+                .status(500)
+                .json({ error: "unable to verify user" + err });
+            });
+        },
+        (getedUser, done) => {
+          if (getedUser) {
+            getedUser
+              .update({
+                bio: bio ? bio : getedUser.bio,
+              })
+              .then(() => {
+                done(getedUser);
+              })
+              .catch((err) => {
+                return res.status(500).json({ error: "cannot update user" });
+              });
+          } else {
+            return res.status(404).json({ error: "user not found" });
+          }
+        },
+      ],
+      (getedUser) => {
+        if (getedUser) return res.status(201).json(getedUser);
+        else
+          return res.status(500).json({ error: "cannot update user profile" });
+      }
+    );
   },
 };
