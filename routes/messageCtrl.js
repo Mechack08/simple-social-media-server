@@ -58,5 +58,30 @@ module.exports = {
       }
     );
   },
-  listMessage: (req, res) => {},
+  listMessage: (req, res) => {
+    const fields = req.query.fields;
+    const limit = parseInt(req.query.limit);
+    const offset = parseInt(req.query.offset);
+    const order = req.query.order;
+
+    models.Message.findAll({
+      order: [order != null ? order.split(":") : ["title", "ASC"]],
+      attributes: fields !== "*" && fields != null ? fields.split(",") : null,
+      limit: !isNaN(limit) ? limit : null,
+      offset: !isNaN(offset) ? offset : null,
+      include: [
+        {
+          model: models.User,
+          attributes: ["username"],
+        },
+      ],
+    })
+      .then((messages) => {
+        if (messages) return res.status(201).json(messages);
+        else return res.status(404).json({ error: "messages not found" });
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: "ivalid fields" });
+      });
+  },
 };
