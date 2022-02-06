@@ -1,6 +1,7 @@
 const express = require("express");
 const usersCtrl = require("./routes/usersCtrl");
 const messagesCtrl = require("./routes/messageCtrl");
+const likesCtrl = require("./routes/likesCtrl");
 
 //Router
 exports.router = (() => {
@@ -15,6 +16,12 @@ exports.router = (() => {
   //Messages Routes
   apiRouter.route("/messages/new/").post(messagesCtrl.createMessage);
   apiRouter.route("/messages/").get(messagesCtrl.listMessage);
+
+  //Like and Dislike Routes
+  apiRouter.route("/messages/:messageId/vote/like").post(likesCtrl.likePost);
+  apiRouter
+    .route("/messages/:messageId/vote/dislike")
+    .post(likesCtrl.disLikePost);
 
   return apiRouter;
 })();

@@ -119,16 +119,20 @@ module.exports = {
       [
         function (done) {
           models.User.findOne({
+            attributes: { exclude: ["userId"] },
             where: { emai: email },
           })
             .then(function (userFound) {
               done(null, userFound);
             })
             .catch(function (err) {
-              return res.status(500).json({ error: "unable to verify user" });
+              return res
+                .status(500)
+                .json({ error: "unable to verify user" + err });
             });
         },
         function (userFound, done) {
+          console.log(userFound);
           if (userFound) {
             bcrypt.compare(
               password,
